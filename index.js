@@ -34,7 +34,8 @@ app.get('/', (req, res) => {
 // use routes
 app.use('/api/users', userRoutes);
 app.use('/api/users', exerciseRoutes);
-app.use('/api/users/', logRoutes);
+
+app.get('/api/users/:id/logs', logRoutes.getUserExerciseLogs);
 
 
 const listener = app.listen(process.env.PORT || 3000, () => {

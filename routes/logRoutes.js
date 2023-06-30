@@ -1,53 +1,65 @@
 const express = require('express');
+const moment = require('moment');
 const router = express.Router();
 
 const Exercise = require('../models/Exercise');
 const User = require('../models/User');
 
-router.get('/:id/logs', async(req, res) => {
+exports.getUserExerciseLogs = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const { id } = req.params;
         const { from, to, limit } = req.query;
 
-        // find the user id
-        const user = await User.findById(userId);
+        // Find the user by their ID
+        const user = await User.findById(id);
+
         if (!user) {
-            return res.status(404).json({ error: 'user not found'});
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        // build query
-        const conditions = { username: user.username };
-        if (from) {
-            conditions.date = { $gte: new Date(from) };
-        }
-        if (to) {
-            conditions.date = { ...conditions.date, $lte: new Date(to) };
+        let exerciseQuery = Exercise.find({ username: user.username });
+
+        // Add date filtering if at least one of "from" or "to" parameters is provided
+        if (from || to) {
+            if (from) {
+                exerciseQuery = exerciseQuery.where('date').gte(from);
+            }
+
+            if (to) {
+                exerciseQuery = exerciseQuery.where('date').lte(to);
+            }
         }
 
-        // query the exercise log
-        let query = Exercise.find(conditions).lean();
+        // Add limit if provided
         if (limit) {
-            query = query.limit(parseInt(limit));
+            exerciseQuery = exerciseQuery.limit(parseInt(limit, 10));
         }
-        const exerciseLog = await query.exec();
 
-        //build response object
-        const log = exerciseLog.map((exercise) => ({
-            description: exercise.description,
-            duration: exercise.duration,
+        console.log('Exercise Query:', exerciseQuery.getQuery()); // Logging the exercise query
+
+        // Execute the exercise query
+        const exercises = await exerciseQuery.exec();
+
+        // Format the date property of each exercise as a string using the dateString format
+        const formattedExercises = exercises.map((exercise) => ({
+            ...exercise._doc,
             date: new Date(exercise.date).toDateString(),
         }));
 
-        res.json({
+        console.log('Exercises:', formattedExercises); // Logging the retrieved exercises
+
+        const response = {
             _id: user._id,
             username: user.username,
-            count: exerciseLog.length,
-            log: log,
-        });
+            from: from || undefined,
+            to: to || undefined,
+            count: formattedExercises.length,
+            log: formattedExercises,
+        };
+
+        res.json(response);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'server error' });
+        res.status(500).json({ message: 'Server Error' });
     }
-});
-
-module.exports = router;
+};
