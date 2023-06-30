@@ -1,16 +1,40 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-require('dotenv').config()
+require('dotenv').config();
 
-app.use(cors())
-app.use(express.static('public'))
+// import required packages
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+// import routes
+const userRoutes = require('./routes/userRoutes');
+const exerciseRoutes = require('./routes/exerciseRoutes');
+const logRoutes = require('./routes/logRoutes');
+
+const app = express();
+
+// connect to mongoDB
+const db = require('./db');
+
+// configure body-parser
+// parse POST bodies
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+const cors = require('cors');
+
+
+app.use(cors());
+
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-
-
+// use routes
+app.use('/api/users', userRoutes);
+app.use('/api/users', exerciseRoutes);
+app.use('/api/users/', logRoutes);
 
 
 const listener = app.listen(process.env.PORT || 3000, () => {
