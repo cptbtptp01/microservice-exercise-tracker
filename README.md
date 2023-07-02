@@ -2,6 +2,14 @@
 
 Exercise Tracker is a web application that allows users to track their exercises. It provides functionality to create new users, add exercises for specific users, and retrieve exercise logs for users.
 
+## Technologies
+- node.js
+- express
+- api
+- json
+- npm
+- javascript
+
 ## Features
 
 - Create a new user by sending a POST request to `/api/users`
