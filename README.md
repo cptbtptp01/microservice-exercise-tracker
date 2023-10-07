@@ -27,3 +27,25 @@ Exercise Tracker is a web application that allows users to track their exercises
 3. Retrieve exercise logs for a user by entering the user ID in the provided input field and clicking "Submit"
    - Optional: Use the query parameters (`from`, `to`, `limit`) to filter the results
 
+## Running on EC2
+.service file in /etc/systemd/system/
+
+```
+[Unit]
+Description=microservice-exercise-tracker
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/node /home/ec2-user/microservice-exercise-tracker/index.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=microservice-exercise-tracker
+User=ec2-user
+EnvironmentFile=/home/ec2-user/microservice-exercise-tracker/path/to/my/env/file
+
+[Install]
+WantedBy=multi-user.target
+```
+

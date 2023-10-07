@@ -25,7 +25,7 @@ const cors = require('cors');
 
 app.use(cors());
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
